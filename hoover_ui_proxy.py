@@ -12,7 +12,18 @@ authproxy_session = os.environ['AUTHPROXY_SESSION']
 def dispatch():
     url = f"{hoover_url}{flask.request.full_path}"
     headers = {'Cookie': f'authproxy.session={authproxy_session}'}
-    resp = requests.get(url, headers=headers, allow_redirects=False)
+
+    content_type = flask.request.headers.get('Content-Type')
+    if content_type:
+        headers['Content-Type'] = content_type
+
+    resp = requests.request(
+        flask.request.method,
+        url,
+        headers=headers,
+        data=flask.request.data,
+        allow_redirects=False,
+    )
 
     if 200 <= resp.status_code < 300:
         rv = flask.Response(
